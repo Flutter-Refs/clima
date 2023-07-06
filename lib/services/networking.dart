@@ -1,3 +1,7 @@
+// ignore_for_file: avoid_print
+
+import 'dart:convert';
+
 import 'package:http/http.dart';
 
 class NetworkHelper {
@@ -5,12 +9,14 @@ class NetworkHelper {
 
   NetworkHelper({required this.url});
 
-  Future<String> getData() async {
+  Future getData() async {
     var response = await get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return response.body;
+      var data = response.body;
+      return jsonDecode(data);
+    } else {
+      print(response.statusCode);
     }
-    return '';
   }
 }

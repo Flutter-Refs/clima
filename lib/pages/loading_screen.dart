@@ -1,10 +1,9 @@
-// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, use_build_context_synchronously
 
-import 'dart:convert';
-
-import 'package:clima/services/location.dart';
-import 'package:clima/services/networking.dart';
+import 'package:clima/pages/location_screen.dart';
+import 'package:clima/services/weather.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -14,9 +13,6 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  String _geolocation = '';
-  Location _location = Location();
-
   @override
   void initState() {
     super.initState();
@@ -27,27 +23,24 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Center(
-          child: Text(
-            _geolocation,
-            style: TextStyle(
-              color: Color(0xFFFFFFFF),
-            ),
-          ),
+        child: SpinKitDoubleBounce(
+          color: Colors.white,
+          size: 100,
         ),
       ),
     );
   }
 
   void getLocationData() async {
-    await _location.getCurrentLocation();
+    var weatherData = await WeatherModel().getLocationWeather();
 
-    var network = NetworkHelper(
-      url: 'https://api.openweathermap.org/data/2.5/weather?lat=${_location.latitude}&lon=${_location.longitude}&appid=c66ee4356297008ed6780332e1a665f9',
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return LocationScreen(
+          locationWeather: weatherData,
+        );
+      }),
     );
-
-    var data = jsonDecode(await network.getData());
-    double temp = data['main']['temp'] - 273.15;
-    print(temp.round().toStringAsFixed(2));
   }
 }
