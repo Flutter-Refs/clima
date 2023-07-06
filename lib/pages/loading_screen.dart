@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
+import 'dart:convert';
+
 import 'package:clima/services/location.dart';
+import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -12,11 +15,12 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   String _geolocation = '';
+  Location _location = Location();
 
   @override
   void initState() {
     super.initState();
-    getLocation();
+    getLocationData();
   }
 
   @override
@@ -35,18 +39,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  void getLocation() async {
-    var loc = Location();
-    await loc.getCurrentLocation();
+  void getLocationData() async {
+    await _location.getCurrentLocation();
 
-    var buffer = StringBuffer();
+    var network = NetworkHelper(
+      url: 'https://api.openweathermap.org/data/2.5/weather?lat=${_location.latitude}&lon=${_location.longitude}&appid=c66ee4356297008ed6780332e1a665f9',
+    );
 
-    buffer.writeln('Latitude: ${loc.latitude.toString()}');
-    buffer.writeln('Longitude: ${loc.longitude.toString()}');
-
-    _geolocation = buffer.toString();
-    buffer.clear();
-
-    print(_geolocation);
+    var data = jsonDecode(await network.getData());
+    double temp = data['main']['temp'] - 273.15;
+    print(temp.round().toStringAsFixed(2));
   }
 }
